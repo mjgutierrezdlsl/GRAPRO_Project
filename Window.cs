@@ -5,26 +5,27 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 public class Window : GameWindow
 {
-    // Tri-force vertices
-    float[] _vertices = {
- -0.5f,-0.5f,0.0f, // FT,BL 0
- 0f,-0.5f,0.0f, // FT,BR 1
- -0.25f,0f,0.0f, // FT,T 2
- 0.5f,-0.5f,0.0f, // ST,BR 3
- 0.25f,0f,0.0f, // ST,T 4
- 0f,0.5f,0.0f // TT,T 5
-};
 
-    uint[] _indices = {
-  0, 1, 2, // first triangle
-  1, 3, 4, // second triangle
-  2, 4, 5, // third triangle
-};
+    float[] vertices = {
+    //Position          Texture coordinates
+     0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
+     0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
+    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+    -0.5f,  0.5f, 0.0f, 0.0f, 1.0f  // top left
+    };
+
+    uint[] indices = {
+        0,1,3, //first triangle
+        1,2,3  // second triangle
+     };
+
     int VertexBufferObject;
-    int VertexArrayObject;
     int ElementBufferObject;
+    int VertexArrayObject;
 
     Shader shader;
+    Texture texture0;
+    Texture texture1;
 
     public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
@@ -34,23 +35,35 @@ public class Window : GameWindow
     {
         base.OnLoad();
 
-        GL.ClearColor(0.4f, 0.2f, 0.6f, 1);
+        GL.ClearColor(0.2f, 0.3f, 0.3f, 1f);
 
         VertexBufferObject = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
-        GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
 
         VertexArrayObject = GL.GenVertexArray();
         GL.BindVertexArray(VertexArrayObject);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
 
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
         GL.EnableVertexAttribArray(0);
+
+        GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+        GL.EnableVertexAttribArray(1);
 
         ElementBufferObject = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBufferObject);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
 
         shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+
+        shader.Use();
+
+        shader.SetInt("texture0", 0);
+        shader.SetInt("texture1", 1);
+
+        texture0 = Texture.LoadFromFile("Textures/container.jpg");
+        texture1 = Texture.LoadFromFile("Textures/awesomeface.png");
+
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -59,16 +72,20 @@ public class Window : GameWindow
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
+        texture0.Use(TextureUnit.Texture0);
+        texture1.Use(TextureUnit.Texture1);
         shader.Use();
+
         GL.BindVertexArray(VertexArrayObject);
-        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+
+        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
 
         SwapBuffers();
     }
 
-    protected override void OnResize(ResizeEventArgs e)
+    protected override void OnFramebufferResize(FramebufferResizeEventArgs e)
     {
-        base.OnResize(e);
+        base.OnFramebufferResize(e);
 
         GL.Viewport(0, 0, e.Width, e.Height);
     }
@@ -76,9 +93,16 @@ public class Window : GameWindow
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
-        if (KeyboardState.IsKeyPressed(Keys.Escape))
+
+        if (KeyboardState.IsKeyDown(Keys.Escape))
         {
             Close();
         }
+    }
+
+    protected override void OnUnload()
+    {
+        shader.Dispose();
+        base.OnUnload();
     }
 }

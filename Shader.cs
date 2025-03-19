@@ -2,7 +2,7 @@ using OpenTK.Graphics.OpenGL4;
 
 public class Shader : IDisposable
 {
-    int Handle;
+    public int Handle;
 
     public Shader(string vertexPath, string fragmentPath)
     {
@@ -43,7 +43,6 @@ public class Shader : IDisposable
     {
         GL.CompileShader(shader);
 
-        // Check if compile is successful
         GL.GetShader(shader, ShaderParameter.CompileStatus, out int success);
         if (success == 0)
         {
@@ -68,6 +67,12 @@ public class Shader : IDisposable
     public void Use()
     {
         GL.UseProgram(Handle);
+    }
+
+    public void SetInt(string name, int value)
+    {
+        int location = GL.GetUniformLocation(Handle, name);
+        GL.Uniform1(location, value);
     }
 
     private bool disposedValue = false;

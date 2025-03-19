@@ -1,13 +1,13 @@
 ﻿using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 
-using (Window window = new Window(GameWindowSettings.Default,
-new NativeWindowSettings()
+var nativeWindowSettings = new NativeWindowSettings()
 {
-    ClientSize = new Vector2i(800, 800),
-    Title = "GRAPRO_Project",
-}
-))
+    ClientSize = new Vector2i(800, 600),
+    Title = "GRAPRO_Test"
+};
+
+using (Window window = new Window(GameWindowSettings.Default, nativeWindowSettings))
 {
     window.Run();
 }
