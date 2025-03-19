@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -7,24 +8,26 @@ public class Window : GameWindow
 {
     // Tri-force vertices
     float[] _vertices = {
- -0.5f,-0.5f,0.0f, // FT,BL 0
- 0f,-0.5f,0.0f, // FT,BR 1
- -0.25f,0f,0.0f, // FT,T 2
- 0.5f,-0.5f,0.0f, // ST,BR 3
- 0.25f,0f,0.0f, // ST,T 4
- 0f,0.5f,0.0f // TT,T 5
-};
+        -1.0f,-1.0f,0.0f,//BL
+         1.0f,-1.0f,0.0f,//BR
+        -1.0f, 1.0f,0.0f,//TL
+         1.0f, 1.0f,0.0f,//TR
+    };
 
     uint[] _indices = {
-  0, 1, 2, // first triangle
-  1, 3, 4, // second triangle
-  2, 4, 5, // third triangle
-};
+        0, 1, 2, // first triangle
+        1, 3, 2, // second triangle
+    };
+
     int VertexBufferObject;
     int VertexArrayObject;
     int ElementBufferObject;
 
     Shader shader;
+    int resolutionLocation;
+    int timeLocation;
+
+    Stopwatch timer;
 
     public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
@@ -51,6 +54,12 @@ public class Window : GameWindow
         GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
 
         shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+
+        resolutionLocation = GL.GetUniformLocation(shader.Handle, "iResolution");
+        timeLocation = GL.GetUniformLocation(shader.Handle, "iTime");
+
+        timer = new Stopwatch();
+        timer.Start();
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -60,6 +69,10 @@ public class Window : GameWindow
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
         shader.Use();
+
+        GL.Uniform2(resolutionLocation, (float)Size.X, (float)Size.Y);
+        GL.Uniform1(timeLocation, (float)timer.Elapsed.TotalSeconds);
+
         GL.BindVertexArray(VertexArrayObject);
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
