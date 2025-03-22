@@ -75,8 +75,6 @@ public class Window : GameWindow
         _timer.Start();
 
         _timerLocation = GL.GetUniformLocation(shader.Handle, "iTime");
-        int timeScaleLocation = GL.GetUniformLocation(shader.Handle, "timeScale");
-        GL.Uniform1(timeScaleLocation, 0.1f);
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
