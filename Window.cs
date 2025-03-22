@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -8,10 +9,10 @@ public class Window : GameWindow
 
     float[] vertices = {
     //Position          Texture coordinates
-     0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
-     0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-    -0.5f,  0.5f, 0.0f, 0.0f, 1.0f  // top left
+     1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // top right
+     1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom left
+    -1.0f,  1.0f, 0.0f, 0.0f, 1.0f  // top left
     };
 
     uint[] indices = {
@@ -26,6 +27,10 @@ public class Window : GameWindow
     Shader shader;
     Texture texture0;
     Texture texture1;
+    Texture noiseTexture;
+
+    Stopwatch _timer;
+    int _timerLocation;
 
     public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
@@ -60,10 +65,18 @@ public class Window : GameWindow
 
         shader.SetInt("texture0", 0);
         shader.SetInt("texture1", 1);
+        shader.SetInt("noiseTexture", 2);
 
         texture0 = Texture.LoadFromFile("Textures/container.jpg");
         texture1 = Texture.LoadFromFile("Textures/awesomeface.png");
+        noiseTexture = Texture.LoadFromFile("Textures/noise_tiled.png");
 
+        _timer = new Stopwatch();
+        _timer.Start();
+
+        _timerLocation = GL.GetUniformLocation(shader.Handle, "iTime");
+        int timeScaleLocation = GL.GetUniformLocation(shader.Handle, "timeScale");
+        GL.Uniform1(timeScaleLocation, 0.1f);
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -71,9 +84,10 @@ public class Window : GameWindow
         base.OnRenderFrame(args);
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
-
+        GL.Uniform1(_timerLocation, (float)_timer.Elapsed.TotalSeconds);
         texture0.Use(TextureUnit.Texture0);
         texture1.Use(TextureUnit.Texture1);
+        noiseTexture.Use(TextureUnit.Texture2);
         shader.Use();
 
         GL.BindVertexArray(VertexArrayObject);
