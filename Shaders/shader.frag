@@ -10,15 +10,24 @@ uniform sampler2D noiseTexture;
 uniform vec2 iResolution;
 uniform float iTime;
 
-float timeScale = 0.1;
+float timeScale = 0.05;
 float range = 0.1;
-float threshold = 0.5;
+float threshold = 0.8;
 
 void main()
 {
-    vec4 noise = texture(noiseTexture,vec2(texCoord.x,texCoord.y+iTime*timeScale));
+    // Scroll the noise texture vertically
+    vec4 noise = texture(noiseTexture,vec2(texCoord.x,texCoord.y-iTime*timeScale));
+
+    // Follows tutorial control
     float t =  smoothstep(threshold-range,threshold+range,noise.r);
+
+    // Pulsing effect
     float strength = sin(iTime)/2.0+0.5;
-    vec4 color1 = mix(vec4(0.,1.,1.,1.),vec4(0.,0.,1.,1.),noise.g);
-    FragColor = mix(mix(color1,vec4(0.,0.,1.,1.),noise.b),color1,t*strength);
+
+    // Random colors for water
+    vec4 color1 = mix(vec4(0.,1.,1.,1.),vec4(0.,0.,1.,1.),noise.r);
+    vec4 color2 = mix(color1,vec4(0.,0.,1.,1.),noise.r);
+
+    FragColor = mix(color2,color1,t*strength);
 }
