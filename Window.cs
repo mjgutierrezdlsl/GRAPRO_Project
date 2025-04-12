@@ -1,4 +1,5 @@
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -23,9 +24,9 @@ public class Window : GameWindow
     int ElementBufferObject;
     int VertexArrayObject;
 
-    Shader shader;
-    Texture texture0;
-    Texture texture1;
+    Shader? shader;
+    Texture? texture0;
+    Texture? texture1;
 
     public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
@@ -72,12 +73,17 @@ public class Window : GameWindow
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
-        texture0.Use(TextureUnit.Texture0);
-        texture1.Use(TextureUnit.Texture1);
-        shader.Use();
-
         GL.BindVertexArray(VertexArrayObject);
 
+        var transform = Matrix4.Identity;
+        transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-20f));
+        transform *= Matrix4.CreateTranslation(0.1f, 0.1f, 0.0f);
+        transform *= Matrix4.CreateScale(0.75f);
+
+        texture0?.Use(TextureUnit.Texture0);
+        texture1?.Use(TextureUnit.Texture1);
+        shader?.Use();
+        shader?.SetMatrix4("transform", transform);
         GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
 
         SwapBuffers();
@@ -102,7 +108,7 @@ public class Window : GameWindow
 
     protected override void OnUnload()
     {
-        shader.Dispose();
+        shader?.Dispose();
         base.OnUnload();
     }
 }
