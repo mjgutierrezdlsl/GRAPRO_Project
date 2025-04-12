@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -8,12 +9,48 @@ public class Window : GameWindow
 {
 
     float[] vertices = {
-    //Position          Texture coordinates
-     0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
-     0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-    -0.5f,  0.5f, 0.0f, 0.0f, 1.0f  // top left
-    };
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+};
 
     uint[] indices = {
         0,1,3, //first triangle
@@ -26,7 +63,8 @@ public class Window : GameWindow
 
     Shader? shader;
     Texture? texture0;
-    Texture? texture1;
+
+    Stopwatch? timer;
 
     public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
@@ -63,28 +101,38 @@ public class Window : GameWindow
         shader.SetInt("texture1", 1);
 
         texture0 = Texture.LoadFromFile("Textures/container.jpg");
-        texture1 = Texture.LoadFromFile("Textures/awesomeface.png");
 
+        timer = new();
+        timer?.Start();
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
     {
         base.OnRenderFrame(args);
 
-        GL.Clear(ClearBufferMask.ColorBufferBit);
+        GL.Enable(EnableCap.DepthTest);
+
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         GL.BindVertexArray(VertexArrayObject);
 
-        var transform = Matrix4.Identity;
-        transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-20f));
-        transform *= Matrix4.CreateTranslation(0.1f, 0.1f, 0.0f);
-        transform *= Matrix4.CreateScale(0.75f);
+        // var transform = Matrix4.Identity;
+        // transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-20f));
+        // transform *= Matrix4.CreateTranslation(0.1f, 0.1f, 0.0f);
+        // transform *= Matrix4.CreateScale(0.75f);
+
+        var model = Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(timer!.ElapsedMilliseconds) * 0.01f);
+        var view = Matrix4.CreateTranslation(0f, 0f, -3f);
+        var projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45.0f), (float)ClientSize.X / ClientSize.Y, 0.1f, 100f);
 
         texture0?.Use(TextureUnit.Texture0);
-        texture1?.Use(TextureUnit.Texture1);
         shader?.Use();
-        shader?.SetMatrix4("transform", transform);
-        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+
+        shader?.SetMatrix4("model", model);
+        shader?.SetMatrix4("view", view);
+        shader?.SetMatrix4("projection", projection);
+
+        GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length);
 
         SwapBuffers();
     }
