@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -26,6 +28,8 @@ public class Window : GameWindow
     Shader shader;
     Texture texture0;
     Texture texture1;
+
+    Stopwatch timer;
 
     public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
@@ -64,6 +68,8 @@ public class Window : GameWindow
         texture0 = Texture.LoadFromFile("Textures/container.jpg");
         texture1 = Texture.LoadFromFile("Textures/awesomeface.png");
 
+        timer = new();
+        timer.Start();
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -78,8 +84,25 @@ public class Window : GameWindow
 
         GL.BindVertexArray(VertexArrayObject);
 
-        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+        var time = (float)timer.Elapsed.TotalSeconds;
+        var sin = (float)Math.Sin(time) / 2.0f + 0.5f;
 
+        var transform = Matrix4.Identity;
+        transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(time * 4f));
+        transform *= Matrix4.CreateScale(0.5f + sin);
+        transform *= Matrix4.CreateTranslation(0.5f, -0.5f, 0f);
+
+        shader.SetMatrix4("transform", transform);
+
+        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+        transform = Matrix4.Identity;
+        transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-time * 4f));
+        transform *= Matrix4.CreateScale(0.5f);
+        transform *= Matrix4.CreateTranslation(-0.5f, 0.5f, 0f);
+
+        shader.SetMatrix4("transform", transform);
+
+        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
         SwapBuffers();
     }
 
