@@ -86,6 +86,7 @@ public class Window : GameWindow
 
         var time = (float)timer.Elapsed.TotalSeconds;
         var sin = (float)Math.Sin(time) / 2.0f + 0.5f;
+        var cos = (float)Math.Cos(time) / 2.0f + 0.5f;
 
         var transform = Matrix4.Identity;
         transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(time * 4f));
@@ -99,6 +100,15 @@ public class Window : GameWindow
         transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-time * 4f));
         transform *= Matrix4.CreateScale(0.5f);
         transform *= Matrix4.CreateTranslation(-0.5f, 0.5f, 0f);
+
+        shader.SetMatrix4("transform", transform);
+
+        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+
+        transform = Matrix4.Identity;
+        transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-time * 4f));
+        transform *= Matrix4.CreateScale(0.5f);
+        transform *= Matrix4.CreateTranslation(MathF.Cos(time) * 0.5f, MathF.Sin(time) * 0.5f, 0f);
 
         shader.SetMatrix4("transform", transform);
 
