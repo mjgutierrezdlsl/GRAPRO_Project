@@ -1,4 +1,5 @@
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -77,6 +78,20 @@ public class Window : GameWindow
         shader.Use();
 
         GL.BindVertexArray(VertexArrayObject);
+
+        Matrix4 transform = Matrix4.Identity;
+        transform *= Matrix4.CreateScale(0.3f);
+        transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(20));
+        transform *= Matrix4.CreateTranslation(0.5f, 0.5f, 0f);
+        shader.SetMatrix4("transform", transform);
+
+        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+
+        transform = Matrix4.Identity;
+        transform *= Matrix4.CreateScale(0.3f);
+        transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(60));
+        transform *= Matrix4.CreateTranslation(-0.5f, -0.5f, 0f);
+        shader.SetMatrix4("transform", transform);
 
         GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
 

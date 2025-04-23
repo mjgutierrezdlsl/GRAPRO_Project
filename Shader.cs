@@ -1,4 +1,5 @@
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 public class Shader : IDisposable
 {
@@ -73,6 +74,12 @@ public class Shader : IDisposable
     {
         int location = GL.GetUniformLocation(Handle, name);
         GL.Uniform1(location, value);
+    }
+
+    public void SetMatrix4(string name, Matrix4 value)
+    {
+        int location = GL.GetUniformLocation(Handle, name);
+        GL.UniformMatrix4(location, true, ref value);
     }
 
     private bool disposedValue = false;
