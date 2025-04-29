@@ -7,22 +7,62 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 public class Window : GameWindow
 {
-
     float[] vertices = {
-    //Position          Texture coordinates
-     0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
-     0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-    -0.5f,  0.5f, 0.0f, 0.0f, 1.0f  // top left
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
-
-    uint[] indices = {
-        0,1,3, //first triangle
-        1,2,3  // second triangle
-     };
-
+    Vector3[] cubePositions = {
+    ( 0.0f,  0.0f,  0.0f),
+    ( 2.0f,  5.0f, -15.0f),
+    (-1.5f, -2.2f, -2.5f),
+    (-3.8f, -2.0f, -12.3f),
+    ( 2.4f, -0.4f, -3.5f),
+    (-1.7f,  3.0f, -7.5f),
+    ( 1.3f, -2.0f, -2.5f),
+    ( 1.5f,  2.0f, -2.5f),
+    ( 1.5f,  0.2f, -1.5f),
+    (-1.3f,  1.0f, -1.5f)
+};
     int VertexBufferObject;
-    int ElementBufferObject;
     int VertexArrayObject;
 
     Shader shader;
@@ -39,6 +79,7 @@ public class Window : GameWindow
     {
         base.OnLoad();
 
+        GL.Enable(EnableCap.DepthTest);
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1f);
 
         VertexBufferObject = GL.GenBuffer();
@@ -53,10 +94,6 @@ public class Window : GameWindow
 
         GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
         GL.EnableVertexAttribArray(1);
-
-        ElementBufferObject = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBufferObject);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
 
         shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
 
@@ -76,7 +113,7 @@ public class Window : GameWindow
     {
         base.OnRenderFrame(args);
 
-        GL.Clear(ClearBufferMask.ColorBufferBit);
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         texture0.Use(TextureUnit.Texture0);
         texture1.Use(TextureUnit.Texture1);
@@ -84,35 +121,29 @@ public class Window : GameWindow
 
         GL.BindVertexArray(VertexArrayObject);
 
-        var time = (float)timer.Elapsed.TotalSeconds;
-        var sin = (float)Math.Sin(time) / 2.0f + 0.5f;
-        var cos = (float)Math.Cos(time) / 2.0f + 0.5f;
+        var model = Matrix4.Identity;
+        var view = Matrix4.Identity;
+        var projection = Matrix4.Identity;
 
-        var transform = Matrix4.Identity;
-        transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(time * 4f));
-        transform *= Matrix4.CreateScale(0.5f + sin);
-        transform *= Matrix4.CreateTranslation(0.5f, -0.5f, 0f);
+        view = Matrix4.CreateTranslation(0.0f, 0.0f, -10.0f);
+        projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45.0f), ClientSize.X / (float)ClientSize.Y, 0.1f, 100f);
 
-        shader.SetMatrix4("transform", transform);
+        shader.SetMatrix4("view", view);
+        shader.SetMatrix4("projection", projection);
 
-        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
-        transform = Matrix4.Identity;
-        transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-time * 4f));
-        transform *= Matrix4.CreateScale(0.5f);
-        transform *= Matrix4.CreateTranslation(-0.5f, 0.5f, 0f);
+        for (int i = 0; i < cubePositions.Length; i++)
+        {
+            var angle = 20.0f * i;
+            if (i % 3 == 0)
+            {
+                angle = (float)timer.Elapsed.TotalSeconds * 25.0f;
+            }
+            model = Matrix4.CreateFromAxisAngle(new(1.0f, 0.3f, 0.5f), MathHelper.DegreesToRadians(angle)) * Matrix4.CreateTranslation(cubePositions[i]);
+            shader.SetMatrix4("model", model);
 
-        shader.SetMatrix4("transform", transform);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length);
+        }
 
-        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
-
-        transform = Matrix4.Identity;
-        transform *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-time * 4f));
-        transform *= Matrix4.CreateScale(0.5f);
-        transform *= Matrix4.CreateTranslation(MathF.Cos(time) * 0.5f, MathF.Sin(time) * 0.5f, 0f);
-
-        shader.SetMatrix4("transform", transform);
-
-        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
         SwapBuffers();
     }
 
