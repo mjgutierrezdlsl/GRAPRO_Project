@@ -60,6 +60,8 @@ public class Window : GameWindow
     Texture texture0;
     Texture texture1;
 
+    Camera camera;
+
     Stopwatch timer;
 
     public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
@@ -99,6 +101,8 @@ public class Window : GameWindow
 
         timer = new();
         timer.Start();
+
+        camera = new(new Vector3(0f, 0f, 3f));
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -115,7 +119,7 @@ public class Window : GameWindow
 
         var view = Matrix4.CreateTranslation(0.0f, 0.0f, -3.0f);
         var projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45f), (float)ClientSize.X / (float)ClientSize.Y, 0.1f, 1000f);
-        shader.SetMatrix4("view", view);
+        shader.SetMatrix4("view", camera.GetViewMatrix());
         shader.SetMatrix4("projection", projection);
 
         DrawCube(Vector3.Zero, Vector3.One, (float)timer.Elapsed.TotalSeconds * 4.0f);
@@ -145,7 +149,7 @@ public class Window : GameWindow
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
-
+        camera.ProcessInputs(KeyboardState, args);
         if (KeyboardState.IsKeyDown(Keys.Escape))
         {
             Close();
