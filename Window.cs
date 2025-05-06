@@ -102,7 +102,8 @@ public class Window : GameWindow
         timer = new();
         timer.Start();
 
-        camera = new(new Vector3(0f, 0f, 3f));
+        camera = new(new Vector3(0f, 0f, 3f), Size.X / (float)Size.Y);
+        CursorState = CursorState.Grabbed;
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
@@ -117,12 +118,10 @@ public class Window : GameWindow
 
         GL.BindVertexArray(VertexArrayObject);
 
-        var view = Matrix4.CreateTranslation(0.0f, 0.0f, -3.0f);
-        var projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45f), (float)ClientSize.X / (float)ClientSize.Y, 0.1f, 1000f);
         shader.SetMatrix4("view", camera.GetViewMatrix());
-        shader.SetMatrix4("projection", projection);
+        shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
-        DrawCube(Vector3.Zero, Vector3.One, (float)timer.Elapsed.TotalSeconds * 4.0f);
+        DrawCube(Vector3.Zero, Vector3.UnitY, (float)timer.Elapsed.TotalSeconds * 4.0f);
 
         SwapBuffers();
     }
@@ -144,18 +143,18 @@ public class Window : GameWindow
         base.OnFramebufferResize(e);
 
         GL.Viewport(0, 0, e.Width, e.Height);
+        camera.SetAspectRatio((float)e.Width, (float)e.Height);
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
-        camera.ProcessInputs(KeyboardState, args);
+        camera.ProcessInputs(KeyboardState, MouseState, args);
         if (KeyboardState.IsKeyDown(Keys.Escape))
         {
             Close();
         }
     }
-
     protected override void OnUnload()
     {
         shader.Dispose();
