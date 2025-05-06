@@ -102,7 +102,7 @@ public class Window : GameWindow
         timer = new();
         timer.Start();
 
-        camera = new(new Vector3(0f, 0f, 3f), Size.X / (float)Size.Y, grabCursor: false);
+        camera = new(new Vector3(0f, 0f, 3f), Size.X / (float)Size.Y, grabCursor: true);
         CursorState = camera.DoGrabCursor ? CursorState.Grabbed : CursorState.Normal;
     }
 
