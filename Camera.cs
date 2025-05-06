@@ -6,20 +6,24 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 public class Camera
 {
+    public bool DoGrabCursor;
+    // Movement Properties
     private float _speed;
     private float _sensitivity;
 
+    // Positioning Properties
     private Vector3 _position;
+    private Vector3 _up = Vector3.UnitY;
+    private Vector3 _front = -Vector3.UnitZ;
+    private Vector3 _right = Vector3.UnitX;
+
+    // Rendering Properties
     private float _aspectRatio;
     private float _fieldOfView;
     private float _depthNear;
     private float _depthFar;
 
-    private Vector3 _up = Vector3.UnitY;
-    private Vector3 _front = -Vector3.UnitZ;
-    private Vector3 _right = Vector3.UnitX;
-
-    public Camera(Vector3 position, float aspectRatio, float speed = 1.5f, float sensitivity = 0.2f, float fieldOfView = 45f, float depthNear = 0.1f, float depthFar = 100f)
+    public Camera(Vector3 position, float aspectRatio, float speed = 1.5f, float sensitivity = 0.2f, float fieldOfView = 45f, float depthNear = 0.1f, float depthFar = 100f, bool grabCursor = true)
     {
         _position = position;
         _aspectRatio = aspectRatio;
@@ -28,6 +32,7 @@ public class Camera
         _fieldOfView = fieldOfView;
         _depthNear = depthNear;
         _depthFar = depthFar;
+        DoGrabCursor = grabCursor;
     }
 
     public Matrix4 GetViewMatrix()

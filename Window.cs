@@ -102,8 +102,8 @@ public class Window : GameWindow
         timer = new();
         timer.Start();
 
-        camera = new(new Vector3(0f, 0f, 3f), Size.X / (float)Size.Y);
-        CursorState = CursorState.Grabbed;
+        camera = new(new Vector3(0f, 0f, 3f), Size.X / (float)Size.Y, grabCursor: false);
+        CursorState = camera.DoGrabCursor ? CursorState.Grabbed : CursorState.Normal;
     }
 
     protected override void OnRenderFrame(FrameEventArgs args)
